@@ -10,7 +10,7 @@ import smtplib
 from mq import *
 
 conn = MySQLdb.connect(user="root",
-                  passwd="1qazxsw2*",
+                  passwd="********",
                   db="Ortam_Izleme")
 x = conn.cursor()
 
