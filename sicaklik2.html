@@ -1,9 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-9" />
-<link rel="import" href="index_parlaklik.php">
-<meta http-equiv="refresh" content="30" >
+
 <script src="jquery-3.1.1.min.js"></script>
 <script src="highstock.js"></script>
 <script src="exporting.js"></script>
@@ -65,7 +63,7 @@ function calculateStatistics() {
     })(series)
 
     // construct the legend string
-    const text = `${series.name}<br>En son: ${series.options.data[series.options.data.length - 1][1].toFixed(2)} lux<br>Maksimum: ${stats.maxPoint.y.toFixed(2)} lux<br>Minimum: ${stats.minPoint.y.toFixed(2)} lux<br>Ortalama: ${stats.avg} lux`;
+    const text = `${series.name}<br>Now: ${series.options.data[series.options.data.length - 1][1]} Â°C<br>Max: ${stats.maxPoint.y}<br>Min: ${stats.minPoint.y}<br>Avg: ${stats.avg}`;
 
     // set the constructed text for the legend
     series.legendItem.attr({
@@ -87,7 +85,7 @@ function calculateStatistics() {
   });
 }
  
- $.getJSON('parlaklik.json', function (data) {
+ $.getJSON('data.json', function (data) {
 		var chart = Highcharts.stockChart('container', {
 
   chart: {
@@ -99,10 +97,6 @@ function calculateStatistics() {
       }
     }
   },
-  title: {
-            useHTML: true,
-			text: '<a href="parlaklik.html" target="_blank">Parlaklik Ölçümleri</a>'
-		},
   xAxis: {
     events: {
       afterSetExtremes: function() {
@@ -113,7 +107,7 @@ function calculateStatistics() {
   legend: {
     enabled: true,
     labelFormatter: function() {
-      return this.name + '<br>' + 'Avg: ' + '0.0' + ' °C' + '<br>max: ' + '0.0' + '<br>min: ' + '0.0' + '<br>Ortalama: ' + '0.0';
+      return this.name + '<br>' + 'Avg: ' + '0.0' + ' Â°C' + '<br>max: ' + '0.0' + '<br>min: ' + '0.0' + '<br>Ortalama: ' + '0.0';
     }
   },
 
@@ -134,7 +128,7 @@ function calculateStatistics() {
   },
 
   series: [{
-    name: 'PARLAKLIK',
+    name: 'SICAKLIK',
 	//data: [[1542639027000,0],[1542639033000,0],[1542639039000,0],[1542639045000,0],[1542639051000,0],[1542639057000,0]]
     data: data
   }]

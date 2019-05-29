@@ -1,91 +1,147 @@
 <!DOCTYPE HTML>
 <html>
-<head>  
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<HEAD>
-<TITLE>NEM OLCUMLERI</TITLE>
-</HEAD>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-9" />
+<link rel="import" href="index_nem.php">
+<meta http-equiv="refresh" content="30" >
+<script src="jquery-3.1.1.min.js"></script>
+<script src="highstock.js"></script>
+<script src="exporting.js"></script>
+<div id="container" style="height: 400px"></div>
 
 <script>
-$.ajax({
-        src:'index.php',
-        type:'GET', 
+function makeLabels() {
+  this.series.slice(0, this.series.length - 1).forEach(series => {
+    series.statsLabels = ['min', 'max'].map((text) => {
+      return this.renderer.label(text, -9999, -9999)
+        .attr({
+          zIndex: 6,
+          align: 'center'
+        })
+        .css({
+          fontSize: '11px',
+          fontWeight: 'bold',
+          color: 'contrast',
+          textOutline: '1px contrast'
+        })
+        .add();
+    });
+  });
+}
+
+function calculateStatistics() {
+
+  this.series.slice(0, this.series.length - 1).forEach(series => { // take only two first series, the last is for the navigator
+    const stats = (function(series) {
+	  const points = series.points;
+      const len = points.length;
+      let i = -1,
+        max = {
+          y: series.dataMin
+        },
+        min = {
+          y: series.dataMax
+        },
+        avg = 0;
+
+      while (++i < len) {
+        const point = points[i];
+
+        if (point.isInside) {
+          const y = point.y;
+
+          if (y > max.y) max = point;
+          if (y < min.y) min = point;
+
+          avg += y
+        }
+      }
+
+      return {
+        minPoint: min,
+        maxPoint: max,
+        avg: (avg / i).toFixed(1)
+      };
+    })(series)
+
+    // construct the legend string
+    const text = `${series.name}<br>En son: ${series.options.data[series.options.data.length - 1][1]} %<br>Maksimum: ${stats.maxPoint.y} %<br>Minimum: ${stats.minPoint.y} %<br>Ortalama: ${stats.avg} %`;
+
+    // set the constructed text for the legend
+    series.legendItem.attr({
+      text: text
+    });
+
+    // set text in labels
+    const tX = series.group.translateX;
+    const tY = series.group.translateY;
+
+    ['min', 'max'].forEach((stat, i) => {
+      const p = stats[stat + 'Point'];
+      series.statsLabels[i].attr({
+        x: tX + p.plotX,
+        y: tY + p.plotY,
+        text: p.y
+      })
+    })
+  });
+}
+ 
+ $.getJSON('nem.json', function (data) {
+		var chart = Highcharts.stockChart('container', {
+
+  chart: {
+    zoomType: 'x',
+    events: {
+      load: function() {
+        makeLabels.call(this);
+        calculateStatistics.call(this);
+      }
+    }
+  },
+  title: {
+            useHTML: true,
+			text: '<a href="nem.html" target="_blank">Nem Ölçümleri</a>'
+		},
+  xAxis: {
+    events: {
+      afterSetExtremes: function() {
+        calculateStatistics.call(this.chart);
+      }
+    }
+  },
+  legend: {
+    enabled: true,
+    labelFormatter: function() {
+      return this.name + '<br>' + 'Avg: ' + '0.0' + ' °C' + '<br>max: ' + '0.0' + '<br>min: ' + '0.0' + '<br>Ortalama: ' + '0.0';
+    }
+  },
+
+  plotOptions: {
+    series: {
+      dataLabels: {
+        enabled: false,
+        shape: 'callout',
+        borderWidth: 1,
+        borderColor: 'black',
+        y: -10
+      },
+      dataGrouping: {
+        //  enabled: false
+        //  forced: true
+      }
+    }
+  },
+
+  series: [{
+    name: 'NEM',
+	//data: [[1542639027000,0],[1542639033000,0],[1542639039000,0],[1542639045000,0],[1542639051000,0],[1542639057000,0]]
+    data: data
+  }]
+
 });
-</script>
-<div id="chartContainer" style="height: 360px; width: 100%;" onclick="window.open('nem.html');"></div>
-<script>
-window.onload = function () {
-
-var dataPoints = [];
-
-var chart = new CanvasJS.Chart("chartContainer", {
-	animationEnabled: true,
-	title:{
-		text: "Nem Ã–lÃ§Ã¼mleri"
-	},
-	axisX: {
-		title: "ZAMAN",
-		titleFontSize: 24,
-		valueFormatString: "DD-MM-YY HH:mm:ss",
-		//intervalType: "day",
-		//interval: 1
-		//labelAutoFit: false,
-		labelAngle: -60
-		//labelMaxWidth: 1,
-		//labelWrap: true
-		//labelFontSize: 1
-	},
-	axisY: {
-		title: "Nem (%)",
-		includeZero: false,
-		suffix: " %"
-	},
-
-	toolTip:{
-		shared: false
-	},
-	data: [{
-		type: "splineArea",
-		yValueFormatString: "#0.00##",
-		showInLegend: false,
-		dataPoints:dataPoints
-	
-	}]
 });
 
-function addData(data) {
-	for (var i = 6; i < data.length; i++) {
-		dataPoints.push({
-			x: new Date(data[i].ZAMAN2*1000),
-			y: Number(data[i].NEM)
-		});
-	}
-	chart.render();
-	console.log( JSON.stringify(dataPoints) );
-
-}
-
-$.getJSON("olcumler.json", addData);
-
-function toggleDataSeries(e){
-	if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
-		e.dataSeries.visible = false;
-	}
-	else{
-		e.dataSeries.visible = true;
-	}
-	chart.render();
-}
-
-
-}
-
-
 </script>
-<script src="canvasjs.min.js"></script>
-<script src="jquery-1.11.1.min.js"></script>
 </head>
-<body>
-<div id="chartContainer" style="height: 370px; width: 100%;"></div>
-</body>
 </html>
