@@ -80,11 +80,11 @@ def distance():
     return distance
 
 def mailgonder(message):
-    fromaddr = 'raspmbalci@gmail.com'  
-    toaddrs  = 'balci_mehmet@windowslive.com'  
+    fromaddr = '******@gmail.com'  
+    toaddrs  = '*******@windowslive.com'  
 
-    username = 'raspmbalci@gmail.com'  
-    password = '1qazXSW2*'
+    username = '*********@gmail.com'  
+    password = '*********'
 
     server = smtplib.SMTP('smtp.gmail.com', 587)  
     server.ehlo()
