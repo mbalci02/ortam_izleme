@@ -1,0 +1,96 @@
+<!DOCTYPE HTML>
+<html>
+<head>  
+<meta http-equiv="Content-Type" content="text/HTML; charset=ISO-8859-9" />
+<meta http-equiv="refresh" content="50" >
+<HEAD>
+<TITLE>SICAKLIK OLCUMLERI</TITLE>
+</HEAD>
+<link rel="import" href="olcumler.php">
+
+<script>
+$.ajax({
+        src:'index2.php',
+        type:'GET', 
+});
+
+</script>
+<div id="chartContainer" style="height: 360px; width: 100%;" onclick="window.open('sicaklik.html');"></div>
+<script>
+window.onload = function () {
+//<div id="chartContainer" style="height: 360px; width: 100%;" onclick="location.href='sicaklik.html';"></div>
+var dataPoints = [];
+
+var chart = new CanvasJS.Chart("chartContainer", {
+	animationEnabled: true,
+	
+	title: {
+            text: "Sıcaklık Ölçümleri"
+            },
+	axisX: {
+		title: "ZAMAN",
+		titleFontSize: 24,
+		valueFormatString: "DD-MM-YY HH:mm:ss",
+		//intervalType: "day",
+		//interval: 1
+		//labelAutoFit: false,
+		labelAngle: -60
+		//labelMaxWidth: 1,
+		//labelWrap: true
+		//labelFontSize: 1
+	},
+	axisY: {
+		title: "Sıcaklık (°C)",
+		includeZero: false,
+		suffix: " °C"
+	},
+
+	toolTip:{
+		shared: false
+	},
+	data: [{
+		type: "spline",
+		yValueFormatString: "#0.## °C",
+		showInLegend: false,
+		dataPoints:dataPoints
+	}]
+
+});
+chart.render();
+
+function addData(data) {
+	for (var i = 1; i < data.length; i++) {
+		dataPoints.push({
+			x: new Date(data[i].ZAMAN2*1000),
+			y: Number(data[i].SICAKLIK)
+		});
+	}
+	chart.render();
+	    
+	
+	console.log( JSON.stringify(dataPoints) );
+
+}
+
+$.getJSON("olcumler.json", addData);
+
+function toggleDataSeries(e){
+	if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+		e.dataSeries.visible = false;
+	}
+	else{
+		e.dataSeries.visible = true;
+	}
+	chart.render();
+	
+}
+}
+
+</script>
+<script src="canvasjs.min.js"></script>
+<script src="jquery-1.11.1.min.js"></script>
+</head>
+<body>
+<div id="chartContainer" style="height: 370px; width: 100%;"></div>
+</body>
+</html>

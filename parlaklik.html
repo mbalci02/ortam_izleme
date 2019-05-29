@@ -1,0 +1,91 @@
+<!DOCTYPE HTML>
+<html>
+<head>  
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<HEAD>
+<TITLE>OLCUMLER</TITLE>
+</HEAD>
+
+<script>
+$.ajax({
+        src:'index2.php',
+        type:'GET', 
+});
+</script>
+<div id="chartContainer" style="height: 360px; width: 100%;" onclick="window.open('parlaklik.html');"></div>
+<script>
+window.onload = function () {
+
+var dataPoints = [];
+
+var chart = new CanvasJS.Chart("chartContainer", {
+	animationEnabled: true,
+	title:{
+		text: "Parlaklık Ölçümleri"
+	},
+	axisX: {
+		title: "ZAMAN",
+		titleFontSize: 24,
+		valueFormatString: "DD-MM-YY HH:mm:ss",
+		//intervalType: "day",
+		//interval: 1
+		//labelAutoFit: false,
+		labelAngle: -60
+		//labelMaxWidth: 1,
+		//labelWrap: true
+		//labelFontSize: 1
+	},
+	axisY: {
+		title: "Parlaklık (LUX)",
+		includeZero: false,
+		suffix: " LUX"
+	},
+
+	toolTip:{
+		shared: false
+	},
+	data: [{
+		type: "splineArea",
+		yValueFormatString: "#0.00## LUX",
+		showInLegend: false,
+		dataPoints:dataPoints
+	
+	}]
+});
+
+function addData(data) {
+	for (var i = 6; i < data.length; i++) {
+		dataPoints.push({
+			x: new Date(data[i].ZAMAN2*1000),
+			y: Number(data[i].PARLAKLIK)
+		});
+	}
+	chart.render();
+	console.log( JSON.stringify(dataPoints) );
+
+}
+
+$.getJSON("olcumler.json", addData);
+
+function toggleDataSeries(e){
+	if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+		e.dataSeries.visible = false;
+	}
+	else{
+		e.dataSeries.visible = true;
+	}
+	chart.render();
+}
+
+
+}
+
+
+</script>
+<script src="canvasjs.min.js"></script>
+<script src="jquery-1.11.1.min.js"></script>
+</head>
+<body>
+<div id="chartContainer" style="height: 370px; width: 100%;"></div>
+</body>
+</html>
